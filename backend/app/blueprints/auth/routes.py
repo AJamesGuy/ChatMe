@@ -3,7 +3,7 @@ from marshmallow import ValidationError
 
 from app.extensions import db, cache, limiter
 from app.models import ChatRoom, User
-from app.utils import encode_token, token_required
+from app.utils.auth import encode_token, token_required
 
 from .schemas import LoginUserSchema, RegisterUserSchema, UpdateSettingsSchema
 
@@ -54,7 +54,7 @@ def login_user():
     return jsonify({"message": "logged in", "user": {"id": user.id, "username": user.username}, "token": token}), 200
 
 
-@auth_bp.route("/<int:user_id>/settings", methods=["PUT"])
+@auth_bp.route("/settings", methods=["PUT"])
 @limiter.limit("5 per minute")  # Limit to 5 requests per minute
 @token_required
 def update_settings(user_id):

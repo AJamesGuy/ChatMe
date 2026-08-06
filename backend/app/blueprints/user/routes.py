@@ -6,13 +6,13 @@ from marshmallow import ValidationError
 
 from app.extensions import db, cache, limiter
 from app.models import ChatRoom, User
-from app.utils import token_required
+from app.utils.auth import token_required
 
 from .schemas import CreateChatroomSchema, GenerateAccessCodeSchema, UpdateChatroomNameSchema
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
-@token_required
+
 def generate_access_code():
     while True:
         parts = ["".join(random.choices(string.ascii_uppercase + string.digits, k=4)) for _ in range(4)]
@@ -22,14 +22,15 @@ def generate_access_code():
 
 
 @user_bp.route("/create-chatroom", methods=["POST"])
-def create_chatroom():
+@token_required
+def create_chatroom(user_id):
     schema = CreateChatroomSchema()
     try:
         payload = schema.load(request.get_json(silent=True) or {})
     except ValidationError as exc:
         return jsonify({"errors": exc.messages}), 400
 
-    user = User.query.get(payload["user_id"])
+    user = User.query.get_or_404(user_id)
     if not user:
         return jsonify({"error": "user not found"}), 404
 
@@ -49,7 +50,8 @@ def create_chatroom():
 
 
 @user_bp.route("/chatrooms/<int:chatroom_id>/name", methods=["PUT"])
-def update_chatroom_name(chatroom_id):
+@token_required
+def update_chatroom_name(user_id, chatroom_id):
     schema = UpdateChatroomNameSchema()
     try:
         payload = schema.load(request.get_json(silent=True) or {})
@@ -60,7 +62,7 @@ def update_chatroom_name(chatroom_id):
     if not chat_room:
         return jsonify({"error": "chat room not found"}), 404
 
-    user = User.query.get(payload["user_id"])
+    user = User.query.get(user_id)
     if not user or user.chat_room_id != chat_room.id or user.role != "admin":
         return jsonify({"error": "forbidden"}), 403
 
@@ -70,18 +72,13 @@ def update_chatroom_name(chatroom_id):
 
 
 @user_bp.route("/chatrooms/<int:chatroom_id>/access-code", methods=["POST"])
-def generate_chatroom_access_code(chatroom_id):
-    schema = GenerateAccessCodeSchema()
-    try:
-        payload = schema.load(request.get_json(silent=True) or {})
-    except ValidationError as exc:
-        return jsonify({"errors": exc.messages}), 400
-
+@token_required
+def generate_chatroom_access_code(chatroom_id, user_id):
     chat_room = ChatRoom.query.get(chatroom_id)
     if not chat_room:
         return jsonify({"error": "chat room not found"}), 404
 
-    user = User.query.get(payload["user_id"])
+    user = User.query.get_or_404(user_id)
     if not user or user.chat_room_id != chat_room.id or user.role != "admin":
         return jsonify({"error": "forbidden"}), 403
 
@@ -91,11 +88,8 @@ def generate_chatroom_access_code(chatroom_id):
 
 
 @user_bp.route("/chatrooms/<int:chatroom_id>/join", methods=["POST"])
-def join_chatroom(chatroom_id):
-    user_id = request.get_json(silent=True, default={}).get("user_id")
-    if not user_id:
-        return jsonify({"error": "user_id is required"}), 400
-
+@token_required
+def join_chatroom(chatroom_id, user_id):
     chat_room = ChatRoom.query.get(chatroom_id)
     if not chat_room:
         return jsonify({"error": "chat room not found"}), 404
