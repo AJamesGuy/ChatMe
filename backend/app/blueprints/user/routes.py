@@ -8,7 +8,7 @@ from app.extensions import db, cache, limiter
 from app.models import ChatRoom, User
 from app.utils.auth import token_required
 
-from .schemas import CreateChatroomSchema, GenerateAccessCodeSchema, UpdateChatroomNameSchema
+from .schemas import CreateChatroomSchema, UpdateChatroomNameSchema, JoinChatroomSchema
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
@@ -30,7 +30,7 @@ def create_chatroom(user_id):
     except ValidationError as exc:
         return jsonify({"errors": exc.messages}), 400
 
-    user = User.query.get_or_404(user_id)
+    user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "user not found"}), 404
 
@@ -73,12 +73,12 @@ def update_chatroom_name(user_id, chatroom_id):
 
 @user_bp.route("/chatrooms/<int:chatroom_id>/access-code", methods=["POST"])
 @token_required
-def generate_chatroom_access_code(chatroom_id, user_id):
+def generate_chatroom_access_code(user_id, chatroom_id):
     chat_room = ChatRoom.query.get(chatroom_id)
     if not chat_room:
         return jsonify({"error": "chat room not found"}), 404
 
-    user = User.query.get_or_404(user_id)
+    user = User.query.get(user_id)
     if not user or user.chat_room_id != chat_room.id or user.role != "admin":
         return jsonify({"error": "forbidden"}), 403
 
@@ -87,10 +87,16 @@ def generate_chatroom_access_code(chatroom_id, user_id):
     return jsonify({"message": "access code generated", "chat_room": {"id": chat_room.id, "name": chat_room.name, "access_code": chat_room.access_code}}), 200
 
 
-@user_bp.route("/chatrooms/<int:chatroom_id>/join", methods=["POST"])
+@user_bp.route("/chatrooms/join", methods=["POST"])
 @token_required
-def join_chatroom(chatroom_id, user_id):
-    chat_room = ChatRoom.query.get(chatroom_id)
+def join_chatroom(user_id):
+    schema = JoinChatroomSchema()
+    try:
+        payload = schema.load(request.get_json(silent=True) or {})
+    except ValidationError as exc:
+        return jsonify({"errors": exc.messages}), 400
+
+    chat_room = ChatRoom.query.filter_by(access_code=payload["access_code"]).first()
     if not chat_room:
         return jsonify({"error": "chat room not found"}), 404
 
