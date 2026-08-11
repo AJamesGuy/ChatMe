@@ -1,0 +1,92 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../assets/black.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 10px;
+    height: 400px;
+    width: 400px;
+    background-color: rgba(255, 255, 255, 0.226);
+    backdrop-filter: brightness(40%);
+    backdrop-filter: blur(10px);
+    
+
+}
+
+.login-container h1 {
+    margin-bottom: 60px;
+    color: white;
+    text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+}
+
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-container input {
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 13px;
+    width: 200px;
+    border-radius: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    color: black;
+}
+
+.login-button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 122, 0.573);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100px;
+    margin: 0 auto;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.signup-button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 10px;
+    background-color: rgba(9, 154, 1, 0.559);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100px;
+    margin: 0 auto;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.login-button:hover {
+    background-color: rgba(0, 0, 122, 0.8);
+}
+
+.login-container div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
