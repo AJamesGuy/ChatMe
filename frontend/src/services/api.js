@@ -52,6 +52,28 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-//API Endpoint Logic
+//Endpoint Logic Below
 
+// Authentication Endpoints
+export const AuthAPI = {
+    login: async (username, password) => {
+        try {
+            const response = await axiosInstance.post("/login", { username, password });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || {"message": "An error occurred while logging in."};
+        }
+    }
+};
 
+// Chatroom Endpoints
+export const ChatroomAPI = {
+    listChatrooms: async () => {
+        try {
+            const response = await axiosInstance.get("/chatrooms");
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || {"message": "An error occurred while fetching chatrooms."};
+        }
+    }
+};

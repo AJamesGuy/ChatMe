@@ -1,7 +1,18 @@
-import React from 'react'
+import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { loginUser } from '../services/api'
 import './login.css'
 
 const Login = () => {
+
+    const handleLogin = (e) => {
+        e.preventDefault();
+        // Implement login logic here
+
+    }
+
+
   return (<>
   <body>
     <div className="login-container">
